@@ -4,12 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "axios": "^1.2.1",
     "pinia": "^2.0.26",
+    "pinia-plugin-persistedstate": "^3.0.1",
+    "secure-ls": "^1.2.6",
+    "socket.io-client": "^4.5.4",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

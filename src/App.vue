@@ -1,6 +1,11 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import HelloWorld from "./components/HelloWorld.vue";
+
+import { useSocketStore } from "@/stores";
+
+const socketStore = useSocketStore();
+socketStore.connect();
 </script>
 
 <template>
