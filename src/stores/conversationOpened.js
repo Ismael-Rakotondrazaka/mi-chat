@@ -12,6 +12,10 @@ export const useConversationOpenedStore = defineStore(
 
     const hasConversationOpened = computed(() => !!conversation.value);
 
+    const id = computed(() =>
+      hasConversationOpened.value ? conversation.value.id : 0
+    );
+
     const is = computed(
       () => (conversationId) =>
         hasConversationOpened.value && conversation.value.id === conversationId
@@ -37,6 +41,12 @@ export const useConversationOpenedStore = defineStore(
     );
 
     const messages = ref([]);
+
+    const medias = computed(() =>
+      messages.value.filter((message) =>
+        ["image", "video", "file"].includes(message.type)
+      )
+    );
 
     const latestMessage = computed(() =>
       messages.value.length > 0
@@ -190,7 +200,7 @@ export const useConversationOpenedStore = defineStore(
     };
 
     const setConversationOpened = async ({ conversationId }) => {
-      await Promise.allSettled([
+      await Promise.all([
         setConversation({ conversationId }),
         setParticipants({ conversationId }),
         setMessages({ conversationId }),
@@ -221,6 +231,8 @@ export const useConversationOpenedStore = defineStore(
       removeParticipant,
       updateParticipant,
       messages,
+      medias,
+      id,
       setMessages,
       addMessage,
       removeMessage,

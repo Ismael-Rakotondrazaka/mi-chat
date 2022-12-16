@@ -41,7 +41,8 @@ const axios = async (options) => {
           if (
             originalError.response &&
             (originalError.response.status === 401 ||
-              originalError.response.status === 403) // TODO add error code checker
+              (originalError.response.status === 403 &&
+                originalError?.response?.data?.error?.code === "E6_1"))
           ) {
             const axiosResponseData = (
               await axiosInstance({
@@ -78,8 +79,15 @@ const axios = async (options) => {
             so we return the new error
           */
 
-          if (error.response && error.response.status === 401) {
-            resetStore.resetStores();
+          if (
+            error.response &&
+            (error.response.status === 401 ||
+              (error.response.status === 403 &&
+                error?.response?.data?.error?.code === "E6_1") ||
+              (error.response.status === 400 &&
+                error?.response?.data?.error?.code === "E2_17"))
+          ) {
+            resetStore.reset();
 
             router.push({
               name: "login",

@@ -31,7 +31,7 @@ export const useUserStore = defineStore("user", () => {
     tokenStore.refreshToken = axiosResponseData.data.tokens.refreshToken;
 
     router.push({
-      name: "conversations-list", // TODO add route
+      name: "conversations-list",
     });
   };
 
