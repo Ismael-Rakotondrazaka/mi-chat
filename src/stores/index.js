@@ -9,3 +9,4 @@ export * from "./conversation";
 export * from "./conversationOpened";
 export * from "./friend";
 export * from "./participant";
+export * from "./route";

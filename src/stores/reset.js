@@ -4,6 +4,7 @@ import { useFriendStore } from "./friend";
 import { useFriendRequestStore } from "./friendRequest";
 import { useParticipantStore } from "./participant";
 import { useProfileOpenedStore } from "./profileOpened";
+import { useRouteStore } from "./route";
 import { useSessionStore } from "./session";
 import { useSocketStore } from "./socket";
 import { useTokenStore } from "./token";
@@ -20,6 +21,7 @@ export const useResetStore = defineStore("reset", () => {
   const friendRequestStore = useFriendRequestStore();
   const participantStore = useParticipantStore();
   const profileOpenedStore = useProfileOpenedStore();
+  const routeStore = useRouteStore();
   const sessionStore = useSessionStore();
   const socketStore = useSocketStore();
   const tokenStore = useTokenStore();
@@ -34,6 +36,7 @@ export const useResetStore = defineStore("reset", () => {
     friendRequestStore.resetStore();
     participantStore.resetStore();
     profileOpenedStore.resetStore();
+    routeStore.resetStore();
     sessionStore.resetStore();
     socketStore.resetStore();
     tokenStore.resetStore();

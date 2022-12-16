@@ -23,7 +23,7 @@ export const useSessionStore = defineStore("session", () => {
     tokenStore.refreshToken = axiosResponseData.data.tokens.refreshToken;
 
     router.push({
-      name: "conversation-list", // TODO create route
+      name: "conversation-list",
     });
   };
 
@@ -39,7 +39,7 @@ export const useSessionStore = defineStore("session", () => {
     resetStore.resetStores();
 
     router.push({
-      name: "home", // TODO create route
+      name: "home",
     });
   };
 

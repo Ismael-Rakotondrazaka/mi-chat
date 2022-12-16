@@ -1,35 +1,69 @@
+<template>
+  <header>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/about">About</RouterLink>
+      <RouterLink
+        :to="{
+          name: 'profile-item',
+          params: {
+            userId: 2,
+          },
+        }"
+      >
+        profile-item
+      </RouterLink>
+      <RouterLink
+        :to="{
+          name: 'friend-list',
+          params: {
+            userId: 3,
+          },
+        }"
+      >
+        friend-list
+      </RouterLink>
+      <RouterLink
+        :to="{
+          name: 'friendrequest-list',
+        }"
+      >
+        friendrequest-list
+      </RouterLink>
+      <RouterLink
+        :to="{
+          name: 'conversation-list',
+        }"
+      >
+        conversation-list
+      </RouterLink>
+      <RouterLink
+        :to="{
+          name: 'conversation-create',
+        }"
+      >
+        conversation-create
+      </RouterLink>
+    </nav>
+  </header>
+
+  <RouterView v-slot="{ Component, route }">
+    <Transition name="slide">
+      <KeepAlive>
+        <component :is="Component" :key="route.name" />
+      </KeepAlive>
+    </Transition>
+  </RouterView>
+</template>
+
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "./components/HelloWorld.vue";
 
 import { useSocketStore } from "@/stores";
 
 const socketStore = useSocketStore();
 socketStore.connect();
 </script>
-
-<template>
-  <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
-</template>
 
 <style scoped>
 header {
