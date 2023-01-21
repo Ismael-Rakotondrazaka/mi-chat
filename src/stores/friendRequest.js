@@ -18,12 +18,59 @@ export const useFriendRequestStore = defineStore("friendRequest", () => {
 
   const friendRequests = ref([]);
 
-  const hasFriendRequests = computed(() => friendRequests.value.length > 0);
+  const friendRequestsCount = computed(() => friendRequests.value.length);
+
+  const hasFriendRequests = computed(() => friendRequestsCount.value > 0);
+
+  const orderNameAscFilter = () =>
+    [...friendRequests.value].sort((a, b) =>
+      a.sender.name.full.localeCompare(b.sender.name.full)
+    );
+
+  const orderNameDescFilter = () =>
+    [...friendRequests.value].sort((a, b) =>
+      b.sender.name.full.localeCompare(a.sender.name.full)
+    );
+
+  const orderSentAscFilter = () =>
+    [...friendRequests.value].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    );
+
+  const orderSentDescFilter = () =>
+    [...friendRequests.value].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+
+  const orderFilter = ref("order-sent-desc");
+
+  const orderFilters = {
+    "order-name-asc": orderNameAscFilter,
+    "order-name-desc": orderNameDescFilter,
+    "order-sent-asc": orderSentAscFilter,
+    "order-sent-desc": orderSentDescFilter,
+  };
+
+  const friendRequestsOrderFiltered = computed(
+    () => orderFilters[orderFilter.value]?.() || []
+  );
+
+  const nameFilter = ref("");
+
+  const friendRequestsFiltered = computed(() =>
+    nameFilter.value.length === 0
+      ? friendRequestsOrderFiltered.value
+      : friendRequestsOrderFiltered.value.filter((friendRequest) => {
+          const toCompare = friendRequest.sender.name.full.toLowerCase();
+
+          return new RegExp(nameFilter.value).test(toCompare);
+        })
+  );
 
   const is = computed(
     () => (friendRequestId) =>
       hasFriendRequests.value &&
-      !!friendRequests.value.find(
+      friendRequests.value.some(
         (friendRequest) => friendRequest.id === friendRequestId
       )
   );
@@ -31,14 +78,10 @@ export const useFriendRequestStore = defineStore("friendRequest", () => {
   const hasFrom = computed(
     () => (userId) =>
       hasFriendRequests.value &&
-      !!friendRequests.value.find(
+      friendRequests.value.some(
         (friendRequest) => friendRequest.sender.id === userId
       )
   );
-
-  const resetStore = () => {
-    friendRequests.value = [];
-  };
 
   const setFriendRequests = async () => {
     const axiosResponseData = (
@@ -91,7 +134,7 @@ export const useFriendRequestStore = defineStore("friendRequest", () => {
     const axiosResponseData = (
       await axios({
         url: `/friendrequests/${friendRequestId}`,
-        method: "POST",
+        method: "PUT",
       })
     ).data;
 
@@ -146,11 +189,21 @@ export const useFriendRequestStore = defineStore("friendRequest", () => {
     destroyFriendRequestHandler(axiosResponseData);
   };
 
+  const resetStore = () => {
+    friendRequests.value = [];
+    orderFilter.value = "order-sent-desc";
+    nameFilter.value = "";
+  };
+
   return {
     friendRequests,
+    friendRequestsCount,
     is,
     hasFrom,
     hasFriendRequests,
+    orderFilter,
+    nameFilter,
+    friendRequestsFiltered,
     removeFriendRequest,
     addFriendRequest,
     storeFriendRequest,

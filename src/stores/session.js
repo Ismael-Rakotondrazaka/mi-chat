@@ -3,12 +3,10 @@ import { useTokenStore } from "./token";
 import { useResetStore } from "./reset";
 
 import { defineStore } from "pinia";
-import { useRouter } from "vue-router";
 
 export const useSessionStore = defineStore("session", () => {
   const tokenStore = useTokenStore();
   const resetStore = useResetStore();
-  const router = useRouter();
 
   const startSession = async ({ data }) => {
     const axiosResponseData = (
@@ -21,10 +19,19 @@ export const useSessionStore = defineStore("session", () => {
 
     tokenStore.accessToken = axiosResponseData.data.tokens.accessToken;
     tokenStore.refreshToken = axiosResponseData.data.tokens.refreshToken;
+  };
 
-    router.push({
-      name: "conversation-list",
-    });
+  const register = async ({ data }) => {
+    const axiosResponseData = (
+      await axios({
+        method: "POST",
+        url: "/auth/register",
+        data: data,
+      })
+    ).data;
+
+    tokenStore.accessToken = axiosResponseData.data.tokens.accessToken;
+    tokenStore.refreshToken = axiosResponseData.data.tokens.refreshToken;
   };
 
   const endSession = async () => {
@@ -36,11 +43,7 @@ export const useSessionStore = defineStore("session", () => {
       },
     });
 
-    resetStore.resetStores();
-
-    router.push({
-      name: "home",
-    });
+    resetStore.reset();
   };
 
   const _resetStore = () => {};
@@ -48,6 +51,7 @@ export const useSessionStore = defineStore("session", () => {
   return {
     startSession,
     endSession,
+    register,
     resetStore: _resetStore,
   };
 });

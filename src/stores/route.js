@@ -2,21 +2,21 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useRouteStore = defineStore("route", () => {
-  const isSettingConversationOpened = ref(false);
-  const isSettingProfileOpened = ref(false);
-  const isSettingConversations = ref(false);
-  const isSettingUser = ref(false);
-  const isSettingFriends = ref(false);
-  const isSettingFriendRequests = ref(false);
+  const isSettingConversationOpened = ref(true);
+  const isSettingProfileOpened = ref(true);
+  const isSettingConversations = ref(true);
+  const isSettingUser = ref(true);
+  const isSettingFriends = ref(true);
+  const isSettingFriendRequests = ref(true);
   const isNotFound = ref(false);
 
   const resetStore = () => {
-    isSettingConversationOpened.value = false;
-    isSettingProfileOpened.value = false;
-    isSettingConversations.value = false;
-    isSettingUser.value = false;
-    isSettingFriends.value = false;
-    isSettingFriendRequests.value = false;
+    isSettingConversationOpened.value = true;
+    isSettingProfileOpened.value = true;
+    isSettingConversations.value = true;
+    isSettingUser.value = true;
+    isSettingFriends.value = true;
+    isSettingFriendRequests.value = true;
     isNotFound.value = false;
   };
 

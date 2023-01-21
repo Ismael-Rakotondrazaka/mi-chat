@@ -12,12 +12,14 @@ const storeFriendRequestHandler = (payload) => {
 
   const friendRequestData = friendRequestResource(payload.data.friendRequest);
 
-  friendRequestStore.addFriendRequest(friendRequestData);
-
   // ! the sender can be another user or the authUser itself
-  const senderId = friendRequestData.sender.id;
+  const receiverId = friendRequestData.receiverId;
 
-  if (profileOpenedStore.is(senderId) && !userStore.is(senderId)) {
+  if (userStore.is(receiverId)) {
+    friendRequestStore.addFriendRequest(friendRequestData);
+  }
+
+  if (profileOpenedStore.is(receiverId) && !userStore.is(receiverId)) {
     profileOpenedStore.user.friendRequest = friendRequestData;
   }
 };

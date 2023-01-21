@@ -1,39 +1,31 @@
 <template>
   <CustomLayout :isLoading="isLoading">
     <template #loading>
-      <div>Loading...</div>
+      <ProfileItemViewLoader />
     </template>
 
     <template #default>
-      <div>
-        <h1>Conversation Item</h1>
-        <div>
-          <div>{{ conversationOpenedStore.conversation }}</div>
-          <ul>
-            <li>
-              <RouterLink
-                :to="{
-                  name: 'conversation-edit',
-                  params: {
-                    conversationId: conversationOpenedStore.id,
-                  },
-                }"
-                >Edit Conversation</RouterLink
-              >
-            </li>
-            <li>
-              <RouterLink
-                :to="{
-                  name: 'participant-create',
-                  params: {
-                    conversationId: conversationOpenedStore.id,
-                  },
-                }"
-                >Create Participant</RouterLink
-              >
-            </li>
-          </ul>
+      <div class="flex flex-col items-center w-full p-3">
+        <CustomNavigation class="w-full max-w-md sticky top-0 bg-sky-50" />
+
+        <div class="mt-3 mb-3 md:mb-5 lg:mb-10">
+          <HeaderText>{{ headerText }}</HeaderText>
         </div>
+
+        <ConversationProfileItem
+          class="w-full max-w-md"
+          :id="conversationOpenedStore.conversation.id"
+          :type="conversationOpenedStore.conversation.type"
+          :name="conversationOpenedStore.conversation.name"
+          :imageUrl="conversationOpenedStore.conversation.imageUrl"
+          :description="conversationOpenedStore.conversation.description"
+          :createdAt="conversationOpenedStore.conversation.createdAt"
+          :updatedAt="conversationOpenedStore.conversation.updatedAt"
+          :converser="conversationOpenedStore.conversation.converser || null"
+          :participation="conversationOpenedStore.conversation.participation"
+          :participants="conversationOpenedStore.participants"
+          :sharedMediasCount="conversationOpenedStore.mediasCount"
+        />
       </div>
     </template>
   </CustomLayout>
@@ -41,17 +33,66 @@
 
 <script setup>
 import CustomLayout from "../components/commons/CustomLayout.vue";
-import { useConversationOpenedStore, useRouteStore } from "../stores";
+import ConversationProfileItem from "../components/conversations/ConversationProfileItem.vue";
+import HeaderText from "../components/commons/HeaderText.vue";
+import CustomNavigation from "../components/navigations/CustomNavigation.vue";
+import ProfileItemViewLoader from "../components/loaders/ProfileItemViewLoader.vue";
+import {
+  useConversationOpenedStore,
+  useRouteStore,
+  useMetaStore,
+} from "../stores";
 
-import { RouterLink } from "vue-router";
-import { computed } from "vue";
+import { computed, watch } from "vue";
+import { useRoute } from "vue-router";
 
 const conversationOpenedStore = useConversationOpenedStore();
 const routeStore = useRouteStore();
+const metaStore = useMetaStore();
+const route = useRoute();
 
 const isLoading = computed(
   () =>
-    routeStore.isSettingConversations || routeStore.isSettingConversationOpened
+    !conversationOpenedStore.hasConversationOpened ||
+    routeStore.isSettingConversations ||
+    routeStore.isSettingConversationOpened
+);
+
+const headerText = computed(() => {
+  let result = "Chat";
+
+  if (conversationOpenedStore.conversation?.type === "group") {
+    result = "Group chat";
+  }
+
+  return result;
+});
+
+watch(
+  [
+    () => route.name === "conversation-item",
+    () => {
+      let result = null;
+
+      if (conversationOpenedStore.conversation) {
+        if (conversationOpenedStore.conversation.type === "personal") {
+          result = `mi-chat | ${conversationOpenedStore.conversation.converser.name.full} chat`;
+        } else if (conversationOpenedStore.conversation.type === "group") {
+          result = `mi-chat | ${conversationOpenedStore.conversation.name} group chat`;
+        }
+      }
+
+      return result;
+    },
+  ],
+  ([newRouteName, newTitle]) => {
+    if (newRouteName && newTitle) {
+      metaStore.title = newTitle;
+    }
+  },
+  {
+    immediate: true,
+  }
 );
 </script>
 

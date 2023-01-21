@@ -14,8 +14,61 @@ export const useUserStore = defineStore("user", () => {
 
   const user = ref(null);
 
-  const is = computed(
-    () => (userId) => !!user.value && user.value.id === userId
+  const is = computed(() => (userId) => user.value?.id === userId);
+
+  const users = ref([]);
+
+  const typeAllFilter = () => users.value.filter(() => true);
+
+  const typeFriendFilter = () =>
+    users.value.filter((user) => user.friendship.isFriend);
+
+  const typeNotFriendFilter = () =>
+    users.value.filter((user) => !user.friendship.isFriend);
+
+  const typeFilter = ref("type-all");
+
+  const typeFilters = {
+    "type-all": typeAllFilter,
+    "type-friend": typeFriendFilter,
+    "type-not-friend": typeNotFriendFilter,
+  };
+
+  const usersTypeFiltered = computed(
+    () => typeFilters[typeFilter.value]?.() || []
+  );
+
+  const orderAscFilter = () =>
+    [...usersTypeFiltered.value].sort((a, b) =>
+      a.name.full.localeCompare(b.name.full)
+    );
+
+  const orderDescFilter = () =>
+    [...usersTypeFiltered.value].sort((a, b) =>
+      b.name.full.localeCompare(a.name.full)
+    );
+
+  const orderFilters = {
+    "order-asc": orderAscFilter,
+    "order-desc": orderDescFilter,
+  };
+
+  const orderFilter = ref("order-asc");
+
+  const usersOrderFiltered = computed(
+    () => orderFilters[orderFilter.value]?.() || []
+  );
+
+  const nameFilter = ref("");
+
+  const usersFiltered = computed(() =>
+    nameFilter.value.length === 0
+      ? usersOrderFiltered.value
+      : usersOrderFiltered.value.filter((user) => {
+          const toCompare = user.name.full.toLowerCase();
+
+          return new RegExp(nameFilter.value).test(toCompare);
+        })
   );
 
   const registerUser = async (data) => {
@@ -98,11 +151,20 @@ export const useUserStore = defineStore("user", () => {
 
   const resetStore = () => {
     user.value = null;
+    users.value = [];
+    typeFilter.value = "type-all";
+    orderFilter.value = "order-asc";
+    nameFilter.value = "";
   };
 
   return {
     user,
     is,
+    users,
+    typeFilter,
+    orderFilter,
+    nameFilter,
+    usersFiltered,
     registerUser,
     setAuthUser,
     showUser,

@@ -2,7 +2,7 @@ import { axios } from "../services/axios";
 import { participantCollection, participantResource } from "../resources";
 
 import { defineStore } from "pinia";
-import { storeParticipantHandler } from "../events";
+import { storeParticipantHandler, updateParticipantHandler } from "../events";
 
 export const useParticipantStore = defineStore("participant", () => {
   const indexParticipant = async ({ conversationId, params }) => {
@@ -48,6 +48,26 @@ export const useParticipantStore = defineStore("participant", () => {
     storeParticipantHandler(axiosResponseData);
   };
 
+  const updateParticipant = async ({
+    conversationId,
+    participantId,
+    data,
+    headers,
+    params,
+  }) => {
+    const axiosDataResponse = (
+      await axios({
+        url: `/conversations/${conversationId}/participants/${participantId}`,
+        method: "PUT",
+        data: data,
+        params: params,
+        headers: headers,
+      })
+    ).data;
+
+    updateParticipantHandler(axiosDataResponse);
+  };
+
   const resetStore = () => {};
 
   return {
@@ -55,5 +75,6 @@ export const useParticipantStore = defineStore("participant", () => {
     resetStore,
     showParticipant,
     storeParticipant,
+    updateParticipant,
   };
 });

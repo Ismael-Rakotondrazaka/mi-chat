@@ -14,7 +14,50 @@ export const useProfileOpenedStore = defineStore("profileOpened", () => {
   );
 
   const friends = computed(() =>
-    hasProfileOpened.value ? user.value.friends : null
+    hasProfileOpened.value ? user.value.friends : []
+  );
+
+  const orderNameAscFilter = () =>
+    [...friends.value].sort((a, b) => a.name.full.localeCompare(b.name.full));
+
+  const orderNameDescFilter = () =>
+    [...friends.value].sort((a, b) => b.name.full.localeCompare(a.name.full));
+
+  const orderFriendshipAscFilter = () =>
+    [...friends.value].sort(
+      (a, b) =>
+        a.friendship.createdAt.getTime() - b.friendship.createdAt.getTime()
+    );
+
+  const orderFriendshipDescFilter = () =>
+    [...friends.value].sort(
+      (a, b) =>
+        b.friendship.createdAt.getTime() - a.friendship.createdAt.getTime()
+    );
+
+  const orderFilter = ref("order-name-asc");
+
+  const orderFilters = {
+    "order-name-asc": orderNameAscFilter,
+    "order-name-desc": orderNameDescFilter,
+    "order-friendship-asc": orderFriendshipAscFilter,
+    "order-friendship-desc": orderFriendshipDescFilter,
+  };
+
+  const friendsOrderFiltered = computed(
+    () => orderFilters[orderFilter.value]?.() || []
+  );
+
+  const nameFilter = ref("");
+
+  const friendsFiltered = computed(() =>
+    nameFilter.value.length === 0
+      ? friendsOrderFiltered.value
+      : friendsOrderFiltered.value.filter((friend) => {
+          const toCompare = friend.name.full.toLowerCase();
+
+          return new RegExp(nameFilter.value).test(toCompare);
+        })
   );
 
   const is = computed(
@@ -35,6 +78,8 @@ export const useProfileOpenedStore = defineStore("profileOpened", () => {
 
   const resetStore = () => {
     user.value = null;
+    orderFilter.value = "order-name-asc";
+    nameFilter.value = "";
   };
 
   return {
@@ -43,6 +88,9 @@ export const useProfileOpenedStore = defineStore("profileOpened", () => {
     friendRequest,
     friends,
     is,
+    orderFilter,
+    nameFilter,
+    friendsFiltered,
     setProfileOpened,
     resetStore,
   };

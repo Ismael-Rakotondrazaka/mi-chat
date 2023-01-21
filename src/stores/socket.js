@@ -1,7 +1,7 @@
 import { useTokenStore } from "./token";
 import { useResetStore } from "./reset";
 
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 import { defineStore } from "pinia";
 import { io } from "socket.io-client";
 import { useRouter } from "vue-router";
@@ -49,7 +49,7 @@ export const useSocketStore = defineStore("socket", () => {
 
   const socketIO = ref(null);
 
-  const isConnected = ref(false);
+  const isConnected = computed(() => !!socketIO.value?.connected);
 
   const connect = () => {
     const backendUrl = import.meta.env.VITE_APP_BACKEND_URL || "";
@@ -63,7 +63,7 @@ export const useSocketStore = defineStore("socket", () => {
     socket.on("connect_error", (err) => {
       // got a forbidden error, so need to login again
       if (err?.data?.error?.statusCode === 403) {
-        resetStore.resetStores();
+        resetStore.reset();
 
         router.push({
           name: "login",
@@ -82,8 +82,15 @@ export const useSocketStore = defineStore("socket", () => {
   const _resetStore = () => {
     socketIO.value?.close();
     socketIO.value = null;
-    isConnected.value = false;
   };
+
+  watch(
+    () => tokenStore.accessToken,
+    () => {
+      _resetStore();
+      connect();
+    }
+  );
 
   return {
     socketIO,

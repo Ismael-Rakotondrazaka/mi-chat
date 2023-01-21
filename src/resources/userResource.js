@@ -1,4 +1,4 @@
-import { friendCollection } from "./friendCollection";
+import { userCollection } from "./userCollection";
 import { friendRequestResource } from "./friendRequestResource";
 import { friendshipResource } from "./friendshipResource";
 import { userCoreResource } from "./userCoreResource";
@@ -14,7 +14,7 @@ const userResource = (resource) => {
       : {
           isFriend: false,
         },
-    friends: friendCollection(resource.friends),
+    friends: userCollection(resource.friends), // use userCollection because the resource can be other than authUser
   };
 };
 

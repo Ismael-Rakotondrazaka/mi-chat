@@ -14,6 +14,9 @@ import MessageListView from "../views/MessageListView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import RegisterView from "../views/RegisterView.vue";
 import LoginView from "../views/LoginView.vue";
+import SearchView from "../views/SearchView.vue";
+import EditProfileView from "../views/EditProfileView.vue";
+import PrivacyPolicyView from "../views/PrivacyPolicyView.vue";
 
 const routes = [
   {
@@ -22,6 +25,7 @@ const routes = [
     component: HomeView,
     meta: {
       needAuth: false,
+      canBeAuth: true,
     },
   },
   {
@@ -49,6 +53,25 @@ const routes = [
     component: () => import("../views/AboutView.vue"),
     meta: {
       needAuth: false,
+      canBeAuth: true,
+    },
+  },
+  {
+    path: "/privacypolicy",
+    name: "privacy-policy",
+    component: PrivacyPolicyView,
+    meta: {
+      needAuth: false,
+      canBeAuth: true,
+    },
+  },
+  {
+    path: "/search",
+    name: "search",
+    component: SearchView,
+    meta: {
+      needAuth: false,
+      canBeAuth: true,
     },
   },
   {
@@ -57,6 +80,7 @@ const routes = [
     component: ProfileItemView,
     meta: {
       needAuth: false,
+      canBeAuth: true,
     },
   },
   {
@@ -65,6 +89,15 @@ const routes = [
     component: FriendListView,
     meta: {
       needAuth: false,
+      canBeAuth: true,
+    },
+  },
+  {
+    path: "/profile/edit",
+    name: "profile-edit",
+    component: EditProfileView,
+    meta: {
+      needAuth: true,
     },
   },
   {
@@ -153,11 +186,18 @@ const routes = [
     component: NotFoundView,
     meta: {
       needAuth: false,
+      canBeAuth: true,
     },
   },
 ];
 
-const authRoutes = routes.filter((route) => route.meta.needAuth);
+const authRoutes = routes
+  .filter((route) => route.meta.needAuth)
+  .map((route) => route.name);
 const unauthRoutes = ["login", "register"];
 
-export { routes, authRoutes, unauthRoutes };
+const canBeAuthRoutes = routes
+  .filter((route) => !route.meta.needAuth && route.meta.canBeAuth)
+  .map((route) => route.name);
+
+export { routes, authRoutes, canBeAuthRoutes, unauthRoutes };
