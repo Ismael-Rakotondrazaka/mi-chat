@@ -8,7 +8,7 @@ import { computed } from "vue";
 export const useUnreadMessageStore = defineStore("unreadMessage", () => {
   const conversationStore = useConversationStore();
 
-  const unreadMessageCount = computed(() =>
+  const unreadMessagesCount = computed(() =>
     conversationStore.conversations.reduce(
       (prev, curr) => prev + curr.unreadMessagesCount,
       0
@@ -30,7 +30,7 @@ export const useUnreadMessageStore = defineStore("unreadMessage", () => {
   const resetStore = () => {};
 
   return {
-    unreadMessageCount,
+    unreadMessagesCount,
     destroyUnreadMessage,
     resetStore,
   };

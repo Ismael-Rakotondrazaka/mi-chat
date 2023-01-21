@@ -8,7 +8,7 @@ const destroyMessageHandler = async (payload) => {
 
   const targetConversationId = +payload.data.conversation.id;
 
-  const targetMessageIds = +payload.data.conversation.messages.map(
+  const targetMessageIds = payload.data.conversation.messages.map(
     (val) => +val
   );
 

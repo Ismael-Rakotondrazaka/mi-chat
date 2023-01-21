@@ -68,7 +68,6 @@ const axios = async (options) => {
                 Authorization: `Bearer ${tokenStore.accessToken}`,
               };
             }
-
             return await axiosInstance(newAxiosOptions);
           } else {
             return Promise.reject(originalError);
@@ -80,6 +79,7 @@ const axios = async (options) => {
           */
 
           if (
+            tokenStore.refreshToken &&
             error.response &&
             (error.response.status === 401 ||
               (error.response.status === 403 &&

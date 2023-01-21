@@ -1,5 +1,6 @@
 import { axios } from "@/services/axios";
 import { friendCollection } from "../resources";
+import { destroyFriendHandler } from "../events";
 
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
@@ -69,7 +70,7 @@ export const useFriendStore = defineStore("friend", () => {
       })
     ).data;
 
-    removeFriend(axiosResponseData.data.user.id);
+    destroyFriendHandler(axiosResponseData);
   };
 
   const resetStore = () => {

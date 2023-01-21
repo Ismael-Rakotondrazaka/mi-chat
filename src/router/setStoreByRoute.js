@@ -7,18 +7,29 @@ import {
   useFriendRequestStore,
   useProfileOpenedStore,
 } from "../stores";
-import { authRoutes } from "./routes";
 import { AxiosError } from "axios";
 
 const setStoreByRoute = async (route) => {
   const routeStore = useRouteStore();
+  const profileOpenedStore = useProfileOpenedStore();
+  const setProfileOpened = async (userId) => {
+    profileOpenedStore.resetStore();
+    routeStore.isNotFound = false;
+    routeStore.isSettingProfileOpened = true;
+    await profileOpenedStore.setProfileOpened({ userId });
+    routeStore.isSettingProfileOpened = false;
+    routeStore.isNotFound = false;
+  };
+  // match order: user => profileOpened
+  const profileOpenedRoutes = ["profile-item", "friend-list"];
+  routeStore.isNotFound = false;
+
   try {
     const userStore = useUserStore();
     const conversationStore = useConversationStore();
     const conversationOpenedStore = useConversationOpenedStore();
     const friendStore = useFriendStore();
     const friendRequestStore = useFriendRequestStore();
-    const profileOpenedStore = useProfileOpenedStore();
 
     // match order: conversations => conversationOpened
     const conversationOpenedRoutes = [
@@ -30,14 +41,6 @@ const setStoreByRoute = async (route) => {
       "participant-edit",
       "participant-create",
     ];
-    const conversationsRoutes = ["conversation-list"];
-
-    const friendsRoutes = ["friend-list"];
-
-    const friendRequestsRoutes = ["friendrequest-list"];
-
-    // match order: user => profileOpened
-    const profileOpenedRoutes = ["profile-item"];
 
     const setAuthUser = async () => {
       routeStore.isSettingUser = true;
@@ -46,6 +49,7 @@ const setStoreByRoute = async (route) => {
     };
 
     const setFriends = async () => {
+      routeStore.isNotFound = false;
       routeStore.isSettingFriends = true;
       await friendStore.setFriends();
       routeStore.isSettingFriends = false;
@@ -61,52 +65,53 @@ const setStoreByRoute = async (route) => {
     };
 
     const setConversationOpened = async (conversationId) => {
-      conversationOpenedStore.resetStore();
       routeStore.isNotFound = false;
-      routeStore.isSettingConversationOpened = true;
+      conversationOpenedStore.messages = [];
+      conversationOpenedStore.participants = [];
+      conversationOpenedStore.participant = null;
+      conversationOpenedStore.messageShownCount = 5;
+      conversationOpenedStore.participantTypeFilter = "participant-type-all";
+      conversationOpenedStore.participantOrderFilter = "participant-order-asc";
+      conversationOpenedStore.participantNameFilter = "";
       await conversationOpenedStore.setConversationOpened({ conversationId });
       routeStore.isSettingConversationOpened = false;
       routeStore.isNotFound = false;
     };
 
+    const setParticipant = async ({ conversationId, participantId }) => {
+      routeStore.isNotFound = false;
+      routeStore.isSettingConversations = true;
+      await conversationOpenedStore.setParticipant({
+        conversationId,
+        participantId,
+      });
+      routeStore.isSettingConversations = false;
+      routeStore.isNotFound = false;
+    };
+
     const setFriendRequests = async () => {
+      routeStore.isNotFound = false;
       routeStore.isSettingFriendRequests = true;
       await friendRequestStore.setFriendRequests();
       routeStore.isSettingFriendRequests = false;
       routeStore.isNotFound = false;
     };
 
-    const setProfileOpened = async (userId) => {
-      profileOpenedStore.resetStore();
-      routeStore.isNotFound = false;
-      routeStore.isSettingProfileOpened = true;
-      await profileOpenedStore.setProfileOpened({ userId });
-      routeStore.isSettingProfileOpened = false;
-      routeStore.isNotFound = false;
-    };
-
-    if (authRoutes.includes(route.name) && !userStore.user) {
+    if (!userStore.user) {
       await setAuthUser();
     }
 
-    if (authRoutes.includes(route.name) && !friendStore.hasFriends) {
+    if (!friendStore.hasFriends) {
       await setFriends();
     }
 
-    if (conversationsRoutes.includes(route.name)) {
-      if (!conversationStore.hasConversations) {
-        await setConversations();
-      }
+    if (!conversationStore.hasConversations) {
+      await setConversations();
     }
 
     if (conversationOpenedRoutes.includes(route.name)) {
       const conversationId = +route.params.conversationId;
 
-      // because "0" is accepted by the router we need to deny it manually
-      // if (conversationId <= 0) {
-      //   routeStore.isNotFound = true;
-      //   conversationOpenedStore.resetStore();
-      // } else {
       if (!conversationStore.hasConversations) {
         await setConversations();
       }
@@ -114,21 +119,22 @@ const setStoreByRoute = async (route) => {
       if (!conversationOpenedStore.is(conversationId)) {
         await setConversationOpened(conversationId);
       }
-      // }
-    }
 
-    if (friendsRoutes.includes(route.name)) {
-      if (!friendStore.hasFriends) {
-        await setFriends();
+      if (route.name === "participant-edit") {
+        const participantId = +route.params.participantId;
+        await setParticipant({ conversationId, participantId });
       }
     }
 
-    if (friendRequestsRoutes.includes(route.name)) {
-      if (!friendRequestStore.hasFriendRequests) {
-        await setFriendRequests();
-      }
+    if (!friendStore.hasFriends) {
+      await setFriends();
     }
 
+    if (!friendRequestStore.hasFriendRequests) {
+      await setFriendRequests();
+    }
+
+    // ! this one can be auth and unauth so need to redo it if the auth is failed
     if (profileOpenedRoutes.includes(route.name)) {
       const userId = +route.params.userId;
 
@@ -137,20 +143,33 @@ const setStoreByRoute = async (route) => {
       }
     }
 
-    // routeStore.isNotFound = false;
+    if (
+      route.name === "conversation-edit" &&
+      conversationOpenedStore.conversation.type === "personal"
+    ) {
+      routeStore.isNotFound = true;
+    }
   } catch (error) {
     routeStore.isSettingConversationOpened = false;
     routeStore.isSettingConversations = false;
     routeStore.isSettingFriendRequests = false;
     routeStore.isSettingFriends = false;
     routeStore.isSettingProfileOpened = false;
+
+    if (profileOpenedRoutes.includes(route.name)) {
+      const userId = +route.params.userId;
+
+      if (!profileOpenedStore.is(userId)) {
+        await setProfileOpened(userId);
+      }
+    }
     routeStore.isSettingUser = false;
 
     const notFoundHandler = () => {
       routeStore.isNotFound = true;
     };
 
-    const forbiddenHandler = () => {
+    const forbiddenHandler = async () => {
       routeStore.isNotFound = true;
     };
 
@@ -160,9 +179,9 @@ const setStoreByRoute = async (route) => {
     };
 
     if (error instanceof AxiosError) {
-      const errorResponse = error.response?.data?.error;
+      const errorResponse = error?.response?.data?.error;
 
-      statusCodeHandler[errorResponse.statusCode]?.(errorResponse);
+      statusCodeHandler[errorResponse?.statusCode]?.(errorResponse); // ! can be undefined
     }
   }
 };

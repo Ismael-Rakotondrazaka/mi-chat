@@ -1,46 +1,41 @@
 <template>
   <CustomLayout :isLoading="isLoading">
-    <template #loading> Loading... </template>
+    <template #loading>
+      <ParticipantListViewLoader />
+    </template>
 
     <template #default>
-      <div>
-        <h1>Participant List</h1>
-        <div>
-          <h2>Conversation</h2>
-          <div>{{ conversationOpenedStore.conversation }}</div>
+      <div class="flex flex-col items-center w-full p-3">
+        <CustomNavigation
+          class="w-full max-w-xl sticky top-0 bg-sky-50 z-[1]"
+        />
+
+        <div class="mt-3 mb-3 md:mb-5 lg:mb-10">
+          <HeaderText>{{ headerText }}</HeaderText>
         </div>
-        <div>
-          <h2>Participants</h2>
-          <div>
-            <ul>
-              <li
-                v-for="participant in conversationOpenedStore.participants"
-                :key="participant.id"
-              >
-                <div>
-                  {{ participant }}
-                </div>
-                <div>
-                  <ul>
-                    <li>
-                      <RouterLink
-                        :to="{
-                          name: 'participant-edit',
-                          params: {
-                            conversationId:
-                              conversationOpenedStore.conversation?.id || 0,
-                            participantId: participant.id,
-                          },
-                        }"
-                      >
-                        Edit participant
-                      </RouterLink>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
+
+        <ParticipantFilter
+          class="sticky top-14 w-full bg-sky-50 max-w-xl z-[1]"
+        />
+
+        <div class="relative w-full max-w-xl z-[0]">
+          <ParticipantList
+            :conversation="conversationOpenedStore.conversation"
+            :participants="conversationOpenedStore.participantsFiltered"
+            class="w-full"
+          />
+        </div>
+
+        <div class="fixed bottom-7 md:bottom-10 right-[10%]">
+          <ButtonUI
+            @click="createParticipantHandler"
+            status="info"
+            class="!rounded-full"
+          >
+            <fa-icon icon="plus" class="inline-block text-lg" />
+
+            <span class="hidden lg:inline ml-3">Add</span>
+          </ButtonUI>
         </div>
       </div>
     </template>
@@ -49,16 +44,63 @@
 
 <script setup>
 import CustomLayout from "../components/commons/CustomLayout.vue";
-import { useRouteStore, useConversationOpenedStore } from "../stores";
+import ParticipantFilter from "../components/participants/ParticipantFilter.vue";
+import ParticipantList from "../components/participants/ParticipantList.vue";
+import ButtonUI from "../components/ui/ButtonUI.vue";
+import HeaderText from "../components/commons/HeaderText.vue";
+import CustomNavigation from "../components/navigations/CustomNavigation.vue";
+import ParticipantListViewLoader from "../components/loaders/ParticipantListViewLoader.vue";
+import {
+  useRouteStore,
+  useConversationOpenedStore,
+  useMetaStore,
+} from "../stores";
 
-import { RouterLink } from "vue-router";
-import { computed } from "vue";
+import { computed, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 const routeStore = useRouteStore();
-
-const isLoading = computed(() => routeStore.isSettingConversationOpened);
-
 const conversationOpenedStore = useConversationOpenedStore();
+const metaStore = useMetaStore();
+const router = useRouter();
+const route = useRoute();
+
+const isLoading = computed(
+  () =>
+    routeStore.isSettingConversationOpened ||
+    !conversationOpenedStore.hasConversationOpened
+);
+
+const headerText = computed(() => {
+  let result = "Members list";
+
+  if (conversationOpenedStore.conversation?.type === "group") {
+    result = `${conversationOpenedStore.conversation.name}'s members list`;
+  }
+
+  return result;
+});
+
+const createParticipantHandler = () => {
+  router.push({
+    name: "participant-create",
+    params: {
+      conversationId: conversationOpenedStore.conversation.id,
+    },
+  });
+};
+
+watch(
+  [() => route.name === "participant-list", headerText],
+  ([newRouteName, newHeaderText]) => {
+    if (newRouteName && newHeaderText) {
+      metaStore.title = `mi-chat | ${newHeaderText}`;
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <style scoped></style>

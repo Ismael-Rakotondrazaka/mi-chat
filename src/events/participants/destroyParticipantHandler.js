@@ -1,13 +1,20 @@
-import { useConversationStore, useConversationOpenedStore } from "../../stores";
+import {
+  useConversationStore,
+  useConversationOpenedStore,
+  useUserStore,
+  useSocketStore,
+} from "../../stores";
 
 const destroyParticipantHandler = (payload) => {
   const conversationStore = useConversationStore();
   const conversationOpenedStore = useConversationOpenedStore();
+  const userStore = useUserStore();
+  const socketStore = useSocketStore();
 
   const targetConversationId = +payload.data.conversation.id;
   const conversationUpdatedAt = new Date(payload.data.conversation.updatedAt);
 
-  const targetParticipantIds = +payload.data.conversation.participants.map(
+  const targetParticipantIds = payload.data.conversation.participants.map(
     (val) => +val
   );
 
@@ -16,6 +23,12 @@ const destroyParticipantHandler = (payload) => {
       conversationOpenedStore.removeParticipant({
         userId: targetParticipantId,
       });
+
+      if (userStore.is(targetParticipantId)) {
+        socketStore.socketIO?.emit("conversations:leave", {
+          conversationId: conversationOpenedStore.conversation.id,
+        });
+      }
     });
 
     if (
@@ -39,7 +52,7 @@ const destroyParticipantHandler = (payload) => {
     });
   }
 
-  // if the don't find the conversation we do anything
+  // if we don't find the conversation we do anything
 };
 
 export { destroyParticipantHandler };

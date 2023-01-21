@@ -12,7 +12,7 @@ const storeParticipantHandler = async (payload) => {
   const targetConversationId = +payload.data.conversation.id;
   const conversationUpdatedAt = new Date(payload.data.conversation.updatedAt);
 
-  const targetParticipantIds = +payload.data.conversation.participants.map(
+  const targetParticipantIds = payload.data.conversation.participants.map(
     (val) => +val
   );
 
