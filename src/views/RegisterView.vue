@@ -9,7 +9,7 @@
         class="flex flex-col items-center w-full p-3 bg-bottom bg-repeat-x min-h-screen"
         :style="{
           'background-image':
-            'url(\'/src/assets/images/illustrations/waves-2-primary.svg\')',
+            'url(\'/images/illustrations/waves-2-primary.svg\')',
         }"
       >
         <div class="mt-3 mb-3 md:mb-5 lg:mb-10">
