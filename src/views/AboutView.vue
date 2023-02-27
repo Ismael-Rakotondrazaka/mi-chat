@@ -3,7 +3,7 @@
     class="bg-bottom bg-repeat-x min-h-screen"
     :style="{
       'background-image':
-        'url(\'/src/assets/images/illustrations/waves-2-primary.svg\')',
+        'url(\'/images/illustrations/waves-2-primary.svg\')',
     }"
   >
     <button

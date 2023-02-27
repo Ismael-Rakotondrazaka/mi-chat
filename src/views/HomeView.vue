@@ -5,17 +5,17 @@
         class="bg-bottom bg-repeat-x"
         :style="{
           'background-image':
-            'url(\'/src/assets/images/illustrations/waves-2-primary.svg\')',
+            'url(\'/images/illustrations/waves-2-primary.svg\')',
         }"
       >
         <button
           v-if="showMenu"
           @click="openAuthNavbarHandler"
-          class="mx-3 mt-3 block md:hidden text-2xl border-2 border-transparent rounded-full"
+          class="block mx-3 mt-3 text-2xl border-2 border-transparent rounded-full md:hidden"
         >
           <fa-icon icon="bars" />
 
-          <span class="inline-block md:hidden ml-3 font-bold text-lg">
+          <span class="inline-block ml-3 text-lg font-bold md:hidden">
             Menu
           </span>
         </button>
