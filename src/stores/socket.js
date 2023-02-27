@@ -72,7 +72,6 @@ export const useSocketStore = defineStore("socket", () => {
     });
 
     socket.onAny((eventName, payload) => {
-      console.log(eventName, payload);
       eventFunction[eventName]?.(payload);
     });
 
