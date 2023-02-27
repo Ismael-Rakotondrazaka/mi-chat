@@ -11,14 +11,13 @@
       <AvatarUI
         :src="avatarSrc"
         :size="'sm'"
-        :type="conversationOpenedStore.conversation.type"
+        :type="avatarType"
+        :userId="avatarUserId"
       />
 
       <div class="w-[80%]">
         <div class="flex flex-col">
-          <p
-            class="truncate text-md md:text-lg font-bold text-slate-900"
-          >
+          <p class="truncate text-md md:text-lg font-bold text-slate-900">
             {{ conversationName }}
           </p>
         </div>
@@ -48,6 +47,14 @@ const avatarSrc = computed(() =>
   conversationOpenedStore.conversation.type === "personal"
     ? conversationOpenedStore.conversation.converser.imageUrl
     : conversationOpenedStore.conversation.imageUrl
+);
+
+const avatarType = computed(() => conversationOpenedStore.conversation.type);
+
+const avatarUserId = computed(() =>
+  conversationOpenedStore.conversation.type === "personal"
+    ? conversationOpenedStore.conversation.converser.id
+    : 0
 );
 
 const conversationName = computed(() =>
